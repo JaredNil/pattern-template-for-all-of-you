@@ -18,7 +18,7 @@ Factory method . Объединение инициализации инстан�
 	function BlockFactory() { };
 
 	BlockFactory.register = function (name, ItemConstructor) { // Outer
-		if (name instanceof Function) {
+		if (name instanceof Functin) {
 			ItemConstructor = name
 			name = null
 		}
@@ -135,7 +135,8 @@ let a = new someClass()  -> same interface
 let b = new otherClassAdapter() -> same interface
 
 
-Brigde
+Brigde  -> Муторная штука, лучше смотреть отдельно. Нерекомендуемая к использованию.
+
 Composite . Компоновщик -> 
 class Component {
 	getPrice() { return this.price || 0 }
@@ -216,7 +217,9 @@ let instance = new AbstractInterface
 new Facade(instance).executing()
 
 
-Flyweight
+Flyweight . Легковес . Cash . Выделяет повторяющие элементы ООП дизайна в отдельную сущность и при потребности даёт instance через factory
+Не сохраняет дважды объекты при наличии одинакового имени.
+Не добавлена реализация ибо нет практичного примера использования.
 
 
 Proxy . Оболочка для частичного доступа к необходимому объекту
@@ -235,17 +238,125 @@ class ProxyAccess {
 const instance = new ProxyAccess(new Interface)
 instance.someFunc()
 
-
-
 //////////////////////////////////////////////////////////////////////////////
-Chain
+Поведенческие шаблоны.
+
+Chain . Пример handler'a:
+class VirtualChains {
+	handler() {
+		if (this.hasHand()) { // Условие выполнения
+			console.log('Handler has done');
+		}
+		else if (this.incomer) { // Проверка на существование приемника у обработчика
+			console.log('Next handler')
+			this.incomer.handler() // Запуск рекурсивно преемника
+		}
+		else {	console.log('Ни один хендлер не справился и приемника дальше нет')	}
+	}
+	hasHand() {	return false }
+	setIncomer(chain) {	this.incomer = chain }
+}
+
+class Chain1 extends VirtualChains {
+	constructor() {
+		super()
+		// ...logic
+	}
+}
+class Chain2 extends VirtualChains {
+	constructor() { super() }
+}
+class Chain3 extends VirtualChains {
+	constructor() { super() }
+}
+
+let chain1 = new Chain1; let chain2 = new Chain2; let chain3 = new Chain3
+chain1.setIncomer(chain2) // Установка зависимостей
+chain2.setIncomer(chain3) // Если 1 не справится - работает 2 и дальше
+chain1.handler() // Выполнение с 1-го обработчика
+
+
 Command
+
+
 Iterpraton
-Iteration
-Mediator
-Memento
+
+
+Iterator . Итератор . Интерфейс для обхода коллекции интансов. Формально обертка над коллекцией для настраиваемого обхода по коллекции.
+class Iterator {
+	constructor(collection) {
+		this.index = 0
+		this.collection = collection
+	}
+	next() { return this.collection[this.index++] }
+	hasNext() { return this.index < this.elements.length }
+}
+
+let coll = new Iterator(['a', 'b', 'c'])
+console.log(coll.next())
+
+
+Mediator Посредник . Нужно для переписи логики взаимодействия независимых блоков кода. 
+В случае обращения такого блока - он обращается в медиатор, который либо внутри себя исполняет код, либо передаёт дальше.
+Сборник функций при обращении разных независимых блоков кода. В конструкторе скорее всего держит intances всех рассматр. блоков.
+class Mediator {
+	constructor() {
+		this.customers = []
+		... and other linked components
+	}
+	addToCustomersList(name) { this.customers.push(name) }
+	midiatorFunc(customer) {     // Функция связывающая сам блок медиатора с объектами Customer
+		let name = customer.getName()
+		this.addToCustomersList(name)
+	}
+}
+class Customer { // Интерфейс одного из связающихся блоков
+	constructor(name, mediatorInstance) {
+		this.name = name
+		this.mediator = mediatorInstance
+	}
+	makeSmth() {
+		this.mediator.midiatorFunc(this)
+	}
+	getName() {	return this.name } // Для медиатора
+}
+
+const mediator = new Mediator()
+let customer = new Customer('Ivan', mediator)
+let customer2 = new Customer('Sav', mediator) // sample text
+
+
+Memento . Снимок . Хранитель . Создаёт обёртку для сохранения значений некоторых объектов.
+
+
 Observer
 State
 Stronger
-template method
-Visitor
+
+
+Visitor . К уже созданному ООП интерфейсу требуется добавить функционал. Создаём независимый класс/функцию,
+к которому в конструкторе требуем instance всех интресуемых классов. В интересуемом интерфейсе
+передаём this визитёру, а он уже накидывает допоплнительные плюшки на instance.
+function Visitor(instance){
+	if (instance intanceof Component){instance.somth = () => {...} }
+}
+Внутри класса для instance добавить метод be like accept(visitor){ visitor(this); }
+Вызов intance.accept(Visitor) => добавлен новый функционал без нагромождения кода в основном интерфейсе.
+
+	
+	
+Strategy Имеется общий интерфейс.
+Функции стратегии описывают параметры конструктора для создания instances этого интерфейса.
+
+function strategy1() { return '1' }
+function strategy2() { return '2' }
+function strategy3() { return '3' }
+
+class CommonInterface {
+	constructor(strategy) {
+		console.log(`Выполняется в соответствии с параметрами стратегии ${strategy()}`);
+	}
+}
+
+let instance1 = new CommonInterface(strategy3)
+let instance2 = new CommonInterface(strategy2)
