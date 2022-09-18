@@ -17,10 +17,7 @@ Factory method. Объединение инициализации инстанс
 	BlockFactory.create = function (itemName) {
 		let ItemConstructor = this[itemName];
 		if (!(ItemConstructor instanceof Function)) {
-			throw {
-				name: 'Error',
-				message: 'constructor "' + itemName + '" undefined'
-			}
+			throw {	name: 'Error',	message: 'constructor "' + itemName + '" undefined' }
 		}
 		return new ItemConstructor();
 	}
@@ -36,11 +33,21 @@ Factory method. Объединение инициализации инстанс
 }
 
 
+Builder. 
 
 
-Builder
+
 Prototype
+
 Singleton. Функция, которая создаёт один и тот же объект с неизменяемыми свойствами. Сам объект вшит в прототип.
+let instance
+class Counter {
+	constructor(){
+		if (!instance) instance = this
+		return instance
+	}
+}
+
 function SingletonFunction() {
 	let instance; 
 	SingletonFunction = function () {
